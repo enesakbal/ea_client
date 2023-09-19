@@ -4,7 +4,8 @@ class FXNetworkConfig<E extends FXInterfaceNetworkModel<E>> {
   final String baseUrl;
   final String? token;
   final String? appName;
-  final Map<String, String>? headers;
+  final Map<String, dynamic>? headers;
+  final bool logging;
 
   final E? errorModel;
 
@@ -14,5 +15,6 @@ class FXNetworkConfig<E extends FXInterfaceNetworkModel<E>> {
     this.appName,
     this.headers,
     this.errorModel,
+    this.logging = false,
   });
 }
