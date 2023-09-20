@@ -1,13 +1,13 @@
 import 'interfaces/fx_interface_network_model.dart';
 
-class FXNetworkConfig<E extends FXInterfaceNetworkModel<E>> {
+class FXNetworkConfig<Error extends FXInterfaceNetworkModel<Error>> {
   final String baseUrl;
   final String? token;
   final String? appName;
   final Map<String, dynamic>? headers;
   final bool logging;
 
-  final E? errorModel;
+  final Error? errorModel;
 
   const FXNetworkConfig({
     required this.baseUrl,

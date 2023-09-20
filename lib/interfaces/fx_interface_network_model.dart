@@ -1,4 +1,4 @@
-abstract class FXInterfaceNetworkModel<T> {
+abstract class FXInterfaceNetworkModel<Model> {
   Map<String, dynamic>? toJson();
-  T fromJson(Map<String, dynamic> json);
+  Model fromJson(Map<String, dynamic> json);
 }

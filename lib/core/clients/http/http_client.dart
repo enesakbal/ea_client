@@ -13,16 +13,17 @@ import '../../models/fx_empty_model.dart';
 import '../../models/fx_error_model.dart';
 import '../../models/fx_response_model.dart';
 
-class HttpClient<E extends FXInterfaceNetworkModel<E>?> extends FXNetworkManager<E> {
+class HttpClient<Error extends FXInterfaceNetworkModel<Error>?> extends FXNetworkManager<Error> {
   final FXNetworkConfig _config;
   final bool isTesting;
   final MockClient? mockClient;
   HttpClient({required super.config, this.isTesting = false, this.mockClient}) : _config = config;
 
   @override
-  Future<FXInterfaceResponseModel<R?, E?>> send<T extends FXInterfaceNetworkModel<T>, R>(
+  Future<FXInterfaceResponseModel<Response?, Error?>>
+      send<ParserModel extends FXInterfaceNetworkModel<ParserModel>, Response>(
     String path, {
-    required T parseModel,
+    required ParserModel parseModel,
     required FXRequestMethods method,
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -30,7 +31,6 @@ class HttpClient<E extends FXInterfaceNetworkModel<E>?> extends FXNetworkManager
     if (isTesting && mockClient == null) throw Exception('In the testing mode mockClient cant be null');
 
     try {
-
       //* Set URI
       final uri = Uri.parse(_config.baseUrl + path)
         ..replace(
@@ -77,30 +77,30 @@ class HttpClient<E extends FXInterfaceNetworkModel<E>?> extends FXNetworkManager
       client.close();
 
       //* return response
-      return getResponseResult<T, R>(responseBody, parseModel, response.statusCode);
+      return getResponseResult<ParserModel, Response>(responseBody, parseModel, response.statusCode);
     } on SocketException {
-      return ResponseModel<R, E?>(
+      return ResponseModel<Response, Error?>(
         error: FXErrorModel(description: 'No internet.'),
       );
     } on HttpException catch (e) {
-      return ResponseModel<R, E?>(
+      return ResponseModel<Response, Error?>(
         error: FXErrorModel(description: e.message),
       );
     } on http.ClientException catch (e) {
-      return ResponseModel<R, E?>(
+      return ResponseModel<Response, Error?>(
         error: FXErrorModel(description: e.message),
       );
     }
   }
 
-  ResponseModel<R, E?> _onError<R>(dynamic responseData, int statusCode) {
-    var error = FXErrorModel<E?>(description: responseData.toString());
+  ResponseModel<Response, Error?> _onError<Response>(dynamic responseData, int statusCode) {
+    var error = FXErrorModel<Error?>(description: responseData.toString());
 
     if (responseData != null || _config.errorModel is EmptyModel) {
       error = generateFXErrorModel(error, responseData);
     }
-    return ResponseModel<R, E?>(
-      error: FXErrorModel<E?>(
+    return ResponseModel<Response, Error?>(
+      error: FXErrorModel<Error?>(
         description: error.description,
         model: error.model,
       ),
