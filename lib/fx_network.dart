@@ -27,7 +27,10 @@ abstract class FXNetworkManager<Error extends FXInterfaceNetworkModel<Error>?> {
     Map<String, dynamic>? queryParameters,
   });
 
-  FXErrorModel<Error?> generateFXErrorModel(FXErrorModel<Error?> error, dynamic data) {
+  FXErrorModel<Error?> generateFXErrorModel(
+    FXErrorModel<Error?> error,
+    dynamic data,
+  ) {
     var generatedError = error;
     if (_config.errorModel == null || _config.errorModel is EmptyModel) {
       return generatedError;
@@ -63,7 +66,10 @@ abstract class FXNetworkManager<Error extends FXInterfaceNetworkModel<Error>?> {
   }
 
   ResponseModel<Response, Error?> getResponseResult<ParserModel extends FXInterfaceNetworkModel<ParserModel>, Response>(
-      dynamic data, ParserModel parserModel, int? statusCode) {
+    dynamic data,
+    ParserModel parserModel,
+    int? statusCode,
+  ) {
     final model = parseBody<Response, ParserModel>(data, parserModel);
 
     return ResponseModel<Response, Error?>(
@@ -74,7 +80,9 @@ abstract class FXNetworkManager<Error extends FXInterfaceNetworkModel<Error>?> {
   }
 
   Response? parseBody<Response, ParserModel extends FXInterfaceNetworkModel<ParserModel>>(
-      dynamic responseBody, ParserModel model) {
+    dynamic responseBody,
+    ParserModel model,
+  ) {
     try {
       if (Response is EmptyModel || Response == EmptyModel) {
         return EmptyModel() as Response;
@@ -89,6 +97,7 @@ abstract class FXNetworkManager<Error extends FXInterfaceNetworkModel<Error>?> {
         return model.fromJson(responseBody) as Response;
       } else {
         log('Response body is not a List or a Map<String, dynamic>');
+        return responseBody as Response;
       }
     } catch (e) {
       log(e.toString());
