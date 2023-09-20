@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -13,7 +12,6 @@ import '../../enums/fx_request_methods.dart';
 import '../../models/fx_empty_model.dart';
 import '../../models/fx_error_model.dart';
 import '../../models/fx_response_model.dart';
-import '../../utils/parse_body.dart';
 
 class HttpClient<E extends FXInterfaceNetworkModel<E>?> extends FXNetworkManager<E> {
   final FXNetworkConfig _config;
@@ -32,18 +30,8 @@ class HttpClient<E extends FXInterfaceNetworkModel<E>?> extends FXNetworkManager
     if (isTesting && mockClient == null) throw Exception('In the testing mode mockClient cant be null');
 
     try {
-      //* set headers
-      final Map<String, dynamic>? headers;
-      if (_config.headers == null && _config.token != null) {
-        headers = {HttpHeaders.authorizationHeader: 'Bearer ${_config.token}'};
-      } else {
-        _config.headers
-            ?.addAll(_config.token != null ? {HttpHeaders.authorizationHeader: 'Bearer ${_config.token}'} : {});
-        headers = _config.headers;
-      }
 
       //* Set URI
-
       final uri = Uri.parse(_config.baseUrl + path)
         ..replace(
           queryParameters: queryParameters?..updateAll((key, value) => value.toString()),
@@ -59,10 +47,21 @@ class HttpClient<E extends FXInterfaceNetworkModel<E>?> extends FXNetworkManager
       }
 
       //* set Request options
+
+      late final dynamic body;
+
+      if (data is FXInterfaceNetworkModel) {
+        body = data.toJson();
+      } else if (data != null) {
+        body = jsonEncode(data);
+      } else {
+        body = data;
+      }
+
       final baseRequest = http.Request(method.stringValue, uri)
-        ..body = (data == 'null' || data == null) ? '' : _getBodyModel(data).toString()
+        ..body = (data == 'null' || data == null) ? '' : body.toString()
         ..headers.clear()
-        ..headers.addAll(headers?.cast<String, String>() ?? {});
+        ..headers.addAll(setHeaders()?.cast<String, String>() ?? {});
 
       //* SEND REQUEST
       final response = await client.send(baseRequest);
@@ -78,7 +77,7 @@ class HttpClient<E extends FXInterfaceNetworkModel<E>?> extends FXNetworkManager
       client.close();
 
       //* return response
-      return _getResponseResult<T, R>(responseBody, parseModel, response.statusCode);
+      return getResponseResult<T, R>(responseBody, parseModel, response.statusCode);
     } on SocketException {
       return ResponseModel<R, E?>(
         error: FXErrorModel(description: 'No internet.'),
@@ -94,25 +93,11 @@ class HttpClient<E extends FXInterfaceNetworkModel<E>?> extends FXNetworkManager
     }
   }
 
-  ResponseModel<R, E> _getResponseResult<T extends FXInterfaceNetworkModel<T>, R>(
-    dynamic data,
-    T parserModel,
-    int? statusCode,
-  ) {
-    final model = parseBody<R, T>(data, parserModel);
-
-    return ResponseModel<R, E>(
-      data: model,
-      error: model == null ? FXErrorModel(description: 'Null is returned after parsing a model $T') : null,
-      statusCode: statusCode,
-    );
-  }
-
   ResponseModel<R, E?> _onError<R>(dynamic responseData, int statusCode) {
     var error = FXErrorModel<E?>(description: responseData.toString());
 
     if (responseData != null || _config.errorModel is EmptyModel) {
-      error = _generateFXErrorModel(error, responseData);
+      error = generateFXErrorModel(error, responseData);
     }
     return ResponseModel<R, E?>(
       error: FXErrorModel<E?>(
@@ -121,50 +106,5 @@ class HttpClient<E extends FXInterfaceNetworkModel<E>?> extends FXNetworkManager
       ),
       statusCode: statusCode,
     );
-  }
-
-  FXErrorModel<E?> _generateFXErrorModel(FXErrorModel<E?> error, dynamic data) {
-    var generatedError = error;
-    if (_config.errorModel == null || _config.errorModel is EmptyModel) {
-      return generatedError;
-    }
-
-    if (data is String) {
-      dynamic jsonBody;
-
-      try {
-        jsonBody = jsonDecode(data);
-      } catch (_) {
-        log('message');
-      }
-
-      if (jsonBody == null || jsonBody is! Map<String, dynamic>) return error;
-
-      generatedError = FXErrorModel<E?>(
-        model: _config.errorModel?.fromJson(jsonBody) as E,
-        description: error.description,
-      );
-    }
-
-    if (data is Map<String, dynamic>) {
-      final jsonBody = data;
-
-      generatedError = FXErrorModel<E?>(
-        model: _config.errorModel?.fromJson(jsonBody) as E,
-        description: error.description,
-      );
-    }
-
-    return generatedError;
-  }
-
-  dynamic _getBodyModel(dynamic data) {
-    if (data is FXInterfaceNetworkModel) {
-      return data.toJson();
-    } else if (data != null) {
-      return jsonEncode(data);
-    } else {
-      return data;
-    }
   }
 }
