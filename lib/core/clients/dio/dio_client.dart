@@ -15,7 +15,7 @@ import '../../models/fx_empty_model.dart';
 import '../../models/fx_error_model.dart';
 import '../../models/fx_response_model.dart';
 
-class DioClient<E extends FXInterfaceNetworkModel<E?>?> extends FXNetworkManager<E?> {
+class DioClient<Error extends FXInterfaceNetworkModel<Error?>?> extends FXNetworkManager<Error?> {
   final FXNetworkConfig _config;
   final dio.HttpClientAdapter _adapter;
 
@@ -24,9 +24,9 @@ class DioClient<E extends FXInterfaceNetworkModel<E?>?> extends FXNetworkManager
         _adapter = adapter ?? HttpClientAdapter();
 
   @override
-  Future<FXInterfaceResponseModel<R?, E?>> send<T extends FXInterfaceNetworkModel<T>, R>(
+  Future<FXInterfaceResponseModel<Response?, Error?>> send<ParserModel extends FXInterfaceNetworkModel<ParserModel>, Response>(
     String path, {
-    required T parseModel,
+    required ParserModel parseModel,
     required FXRequestMethods method,
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -68,12 +68,12 @@ class DioClient<E extends FXInterfaceNetworkModel<E?>?> extends FXNetworkManager
 
       //* if success
       if (responseStatusCode >= HttpStatus.ok && responseStatusCode <= HttpStatus.multipleChoices) {
-        return getResponseResult<T, R>(response.data, parseModel, response.statusCode);
+        return getResponseResult<ParserModel, Response>(response.data, parseModel, response.statusCode);
       }
 
       //* if has an error
       else {
-        return ResponseModel<R, E?>(
+        return ResponseModel<Response, Error?>(
           error: FXErrorModel(description: response.data.toString()),
           statusCode: response.statusCode,
         );
@@ -82,20 +82,20 @@ class DioClient<E extends FXInterfaceNetworkModel<E?>?> extends FXNetworkManager
       //* if has an error
 
       log(e.toString());
-      return _onError<R>(e);
+      return _onError<Response>(e);
     }
   }
 
-  ResponseModel<R, E?> _onError<R>(dio.DioException e) {
+  ResponseModel<Response, Error?> _onError<Response>(dio.DioException e) {
     final errorResponse = e.response;
 
-    var error = FXErrorModel<E?>(description: e.message ?? e.response?.statusMessage ?? e.error.toString());
+    var error = FXErrorModel<Error?>(description: e.message ?? e.response?.statusMessage ?? e.error.toString());
 
     if (errorResponse != null || _config.errorModel is EmptyModel) {
       error = generateFXErrorModel(error, errorResponse?.data);
     }
-    return ResponseModel<R, E?>(
-      error: FXErrorModel<E?>(
+    return ResponseModel<Response, Error?>(
+      error: FXErrorModel<Error?>(
         description: error.description,
         model: error.model,
       ),

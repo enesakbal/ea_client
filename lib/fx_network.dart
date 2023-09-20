@@ -12,21 +12,22 @@ import 'interfaces/fx_interface_response_model.dart';
 
 /// The FXNetworkManager class is an abstract class that defines a contract for managing network operations with models that
 /// implement the FXNetworkManager interface.
-abstract class FXNetworkManager<E extends FXInterfaceNetworkModel<E>?> {
+abstract class FXNetworkManager<Error extends FXInterfaceNetworkModel<Error>?> {
   final FXNetworkConfig _config;
   const FXNetworkManager({required FXNetworkConfig config}) : _config = config;
 
   /// The `send` method is used to send an HTTP request to a specified `path` with various parameters. Here is a breakdown of
   /// the parameters:
-  Future<FXInterfaceResponseModel<R?, E?>> send<T extends FXInterfaceNetworkModel<T>, R>(
+  Future<FXInterfaceResponseModel<Response?, Error?>>
+      send<ParserModel extends FXInterfaceNetworkModel<ParserModel>, Response>(
     String path, {
-    required T parseModel,
+    required ParserModel parseModel,
     required FXRequestMethods method,
     dynamic data,
     Map<String, dynamic>? queryParameters,
   });
 
-  FXErrorModel<E?> generateFXErrorModel(FXErrorModel<E?> error, dynamic data) {
+  FXErrorModel<Error?> generateFXErrorModel(FXErrorModel<Error?> error, dynamic data) {
     var generatedError = error;
     if (_config.errorModel == null || _config.errorModel is EmptyModel) {
       return generatedError;
@@ -43,8 +44,8 @@ abstract class FXNetworkManager<E extends FXInterfaceNetworkModel<E>?> {
 
       if (jsonBody == null || jsonBody is! Map<String, dynamic>) return error;
 
-      generatedError = FXErrorModel<E?>(
-        model: _config.errorModel?.fromJson(jsonBody) as E,
+      generatedError = FXErrorModel<Error?>(
+        model: _config.errorModel?.fromJson(jsonBody) as Error,
         description: error.description,
       );
     }
@@ -52,8 +53,8 @@ abstract class FXNetworkManager<E extends FXInterfaceNetworkModel<E>?> {
     if (data is Map<String, dynamic>) {
       final jsonBody = data;
 
-      generatedError = FXErrorModel<E?>(
-        model: _config.errorModel?.fromJson(jsonBody) as E,
+      generatedError = FXErrorModel<Error?>(
+        model: _config.errorModel?.fromJson(jsonBody) as Error,
         description: error.description,
       );
     }
@@ -61,30 +62,31 @@ abstract class FXNetworkManager<E extends FXInterfaceNetworkModel<E>?> {
     return generatedError;
   }
 
-  ResponseModel<R, E?> getResponseResult<T extends FXInterfaceNetworkModel<T>, R>(
-      dynamic data, T parserModel, int? statusCode) {
-    final model = parseBody<R, T>(data, parserModel);
+  ResponseModel<Response, Error?> getResponseResult<ParserModel extends FXInterfaceNetworkModel<ParserModel>, Response>(
+      dynamic data, ParserModel parserModel, int? statusCode) {
+    final model = parseBody<Response, ParserModel>(data, parserModel);
 
-    return ResponseModel<R, E?>(
+    return ResponseModel<Response, Error?>(
       data: model,
-      error: model == null ? FXErrorModel(description: 'Null is returned after parsing a model $T') : null,
+      error: model == null ? FXErrorModel(description: 'Null is returned after parsing a model $ParserModel') : null,
       statusCode: statusCode,
     );
   }
 
-  R? parseBody<R, T extends FXInterfaceNetworkModel<T>>(dynamic responseBody, T model) {
+  Response? parseBody<Response, ParserModel extends FXInterfaceNetworkModel<ParserModel>>(
+      dynamic responseBody, ParserModel model) {
     try {
-      if (R is EmptyModel || R == EmptyModel) {
-        return EmptyModel() as R;
+      if (Response is EmptyModel || Response == EmptyModel) {
+        return EmptyModel() as Response;
       } else if (responseBody is List) {
         return responseBody
             .map(
               (data) => model.fromJson(data is Map<String, dynamic> ? data : {}),
             )
-            .cast<T>()
-            .toList() as R;
+            .cast<ParserModel>()
+            .toList() as Response;
       } else if (responseBody is Map<String, dynamic>) {
-        return model.fromJson(responseBody) as R;
+        return model.fromJson(responseBody) as Response;
       } else {
         log('Response body is not a List or a Map<String, dynamic>');
       }
