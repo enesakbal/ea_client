@@ -12,11 +12,12 @@ import '../../../_utils/models/post_model/post_model.dart';
 
 void main() {
   late final FXNetworkManager client;
+  late final FXNetworkConfig config;
   late final DioAdapter dioAdapter;
   late final List<dynamic> postModelList;
 
   setUpAll(() {
-    final config = FXNetworkConfig(
+    config = FXNetworkConfig<EmptyModel>(
       baseUrl: 'https://jsonplaceholder.typicode.com/',
       appName: 'example',
       headers: {'Content-type': 'application/json; charset=UTF-8'},
