@@ -4,17 +4,25 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/dio.dart' as dio;
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../../../fx_network.dart';
+import '../../../fx_network_config.dart';
 import '../../../interfaces/fx_interface_network_model.dart';
 import '../../../interfaces/fx_interface_response_model.dart';
 import '../../enums/fx_request_methods.dart';
 import '../../models/fx_empty_model.dart';
 import '../../models/fx_error_model.dart';
 import '../../models/fx_response_model.dart';
+import '../../utils/parse_body.dart';
 
 class DioClient<E extends FXInterfaceNetworkModel<E?>?> extends FXNetworkManager<E?> {
-  DioClient({required super.config});
+  final FXNetworkConfig _config;
+  final dio.HttpClientAdapter _adapter;
+
+  DioClient({required super.config, dio.HttpClientAdapter? adapter})
+      : _config = config,
+        _adapter = adapter ?? HttpClientAdapter();
 
   @override
   Future<FXInterfaceResponseModel<R?, E?>> send<T extends FXInterfaceNetworkModel<T>, R>(
@@ -25,30 +33,65 @@ class DioClient<E extends FXInterfaceNetworkModel<E?>?> extends FXNetworkManager
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
+      //* set headers
+      final Map<String, dynamic>? headers;
+      if (_config.headers == null && _config.token != null) {
+        headers = {HttpHeaders.authorizationHeader: 'Bearer ${_config.token}'};
+      } else {
+        _config.headers
+            ?.addAll(_config.token != null ? {HttpHeaders.authorizationHeader: 'Bearer ${_config.token}'} : {});
+        headers = _config.headers;
+      }
+
+      //* set dio config
       final Dio dio = Dio(
         BaseOptions(
-          baseUrl: config.baseUrl,
+          baseUrl: _config.baseUrl,
           method: method.stringValue,
-          headers: config.headers,
+          headers: headers,
+          queryParameters: queryParameters,
         ),
-      );
-      final body = _getBodyModel(data);
+      )..httpClientAdapter = _adapter;
 
+      //* if logging is true
+      if (_config.logging) {
+        dio.interceptors.add(
+            PrettyDioLogger(compact: false, logPrint: (object) => log(object.toString(), name: '${_config.appName}')));
+      }
+
+      //* prepare body
+      late final dynamic body;
+
+      if (data is FXInterfaceNetworkModel) {
+        body = data.toJson();
+      } else if (data != null && data! is Map) {
+        body = jsonEncode(data);
+      } else {
+        body = data;
+      }
+
+      //* send request
       final response = await dio.request(
         path,
         data: body,
       );
       final responseStatusCode = response.statusCode ?? HttpStatus.notFound;
 
+      //* if success
       if (responseStatusCode >= HttpStatus.ok && responseStatusCode <= HttpStatus.multipleChoices) {
         return _getResponseResult<T, R>(response.data, parseModel, response.statusCode);
-      } else {
+      }
+
+      //* if has an error
+      else {
         return ResponseModel<R, E?>(
-          error: ErrorModel(description: response.data.toString()),
+          error: FXErrorModel(description: response.data.toString()),
           statusCode: response.statusCode,
         );
       }
     } on dio.DioException catch (e) {
+      //* if has an error
+
       log(e.toString());
       return _onError<R>(e);
     }
@@ -56,64 +99,25 @@ class DioClient<E extends FXInterfaceNetworkModel<E?>?> extends FXNetworkManager
 
   ResponseModel<R, E?> _getResponseResult<T extends FXInterfaceNetworkModel<T>, R>(
       dynamic data, T parserModel, int? statusCode) {
-    final model = _parseBody<R, T>(data, parserModel);
+    final model = parseBody<R, T>(data, parserModel);
 
     return ResponseModel<R, E?>(
       data: model,
-      error: model == null ? ErrorModel(description: 'Null is returned after parsing a model $T') : null,
+      error: model == null ? FXErrorModel(description: 'Null is returned after parsing a model $T') : null,
       statusCode: statusCode,
     );
-  }
-
-  R? _parseBody<R, T extends FXInterfaceNetworkModel<T>>(dynamic responseBody, T model) {
-    try {
-      if (R is EmptyModel || R == EmptyModel) {
-        return EmptyModel() as R;
-      }
-
-      if (responseBody is List) {
-        return responseBody
-            .map(
-              (data) => model.fromJson(data is Map<String, dynamic> ? data : {}),
-            )
-            .cast<T>()
-            .toList() as R;
-      }
-
-      if (responseBody is Map<String, dynamic>) {
-        return model.fromJson(responseBody) as R;
-      } else {
-        /// Throwing exception if the response body is not a List or a Map<String, dynamic>.
-        throw Exception(
-          'Response body is not a List or a Map<String, dynamic>',
-        );
-      }
-    } catch (e) {
-      log(e.toString());
-    }
-    return null;
-  }
-
-  dynamic _getBodyModel(dynamic data) {
-    if (data is FXInterfaceNetworkModel) {
-      return data.toJson();
-    } else if (data != null) {
-      return jsonEncode(data);
-    } else {
-      return data;
-    }
   }
 
   ResponseModel<R, E?> _onError<R>(dio.DioException e) {
     final errorResponse = e.response;
 
-    var error = ErrorModel<E?>(description: e.message);
+    var error = FXErrorModel<E?>(description: e.message ?? e.response?.statusMessage ?? e.error.toString());
 
-    if (errorResponse != null) {
-      error = _generateErrorModel(error, errorResponse.data);
+    if (errorResponse != null || _config.errorModel is EmptyModel) {
+      error = _generateFXErrorModel(error, errorResponse?.data);
     }
     return ResponseModel<R, E?>(
-      error: ErrorModel<E?>(
+      error: FXErrorModel<E?>(
         description: error.description,
         model: error.model,
       ),
@@ -121,9 +125,9 @@ class DioClient<E extends FXInterfaceNetworkModel<E?>?> extends FXNetworkManager
     );
   }
 
-  ErrorModel<E?> _generateErrorModel(ErrorModel<E?> error, dynamic data) {
+  FXErrorModel<E?> _generateFXErrorModel(FXErrorModel<E?> error, dynamic data) {
     var generatedError = error;
-    if (config.errorModel == null) {
+    if (_config.errorModel == null || _config.errorModel is EmptyModel) {
       return generatedError;
     }
 
@@ -138,13 +142,19 @@ class DioClient<E extends FXInterfaceNetworkModel<E?>?> extends FXNetworkManager
 
       if (jsonBody == null || jsonBody is! Map<String, dynamic>) return error;
 
-      generatedError = error.copyWith(model: config.errorModel?.fromJson(jsonBody) as E);
+      generatedError = FXErrorModel<E?>(
+        model: _config.errorModel?.fromJson(jsonBody) as E,
+        description: error.description,
+      );
     }
 
     if (data is Map<String, dynamic>) {
       final jsonBody = data;
 
-      generatedError = error.copyWith(model: config.errorModel!.fromJson(jsonBody) as E);
+      generatedError = FXErrorModel<E?>(
+        model: _config.errorModel?.fromJson(jsonBody) as E,
+        description: error.description,
+      );
     }
 
     return generatedError;
