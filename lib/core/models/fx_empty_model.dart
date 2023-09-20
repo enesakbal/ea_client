@@ -4,9 +4,7 @@ class EmptyModel extends FXInterfaceNetworkModel<EmptyModel> {
   EmptyModel();
 
   EmptyModel.fromJson(Map<String, dynamic>? json) {
-    if (json == null) {
-      return;
-    }
+    if (json == null) return;
   }
 
   @override

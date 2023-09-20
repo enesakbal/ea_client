@@ -3,7 +3,7 @@ enum FXRequestMethods {
   PATCH('PATCH'),
   POST('POST'),
   PUT('PUT'),
-  DELETE('PUT');
+  DELETE('DELETE');
 
   final String stringValue;
   const FXRequestMethods(this.stringValue);
