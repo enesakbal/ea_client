@@ -52,8 +52,8 @@ void main() {
           method: RequestMethods.GET,
         );
         // expect(response, isA<ErrorModel>());
-      } on ErrorModel<TmdbErrorModel> catch (e) {
-        expect(e.model, 404);
+      } on ErrorModel catch (e) {
+        expect(e.statusCode, 404);
       }
     });
   });

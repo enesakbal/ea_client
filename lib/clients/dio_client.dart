@@ -71,8 +71,7 @@ class DioClient extends EAClient {
       if (responseStatusCode >= HttpStatus.ok && responseStatusCode <= HttpStatus.multipleChoices) {
         return getResponseResult<ParserModel, ResponseData>(response.data, parseModel, response.statusCode);
       }
-
-      throw ErrorModel(description: response.statusMessage ?? response.statusCode.toString());
+      throw _config.generateErrorModel(description: response.statusMessage ?? response.statusCode.toString());
     } on dio.DioException catch (e) {
       //* if has an error
 
@@ -84,27 +83,27 @@ class DioClient extends EAClient {
   ErrorModel _onError(dio.DioException e) {
     final errorResponse = e.response;
 
-    var error = ErrorModel(description: e.message ?? e.response?.statusMessage ?? e.error.toString());
+    /// Creates a new ErrorModel object with the given description.
+    final error = _config.generateErrorModel(description: e.message ?? e.response?.statusMessage ?? e.error.toString());
 
-    if (errorResponse != null) {
-      error = generateErrorModel(errorResponse.data, e);
-    }
-    return ErrorModel(description: error.description, model: error.model, statusCode: e.response?.statusCode);
-  }
+    /// Gets the data from the error response.
+    final data = errorResponse?.data;
 
-  ErrorModel generateErrorModel(dynamic data, dio.DioException e) {
-    //  var generatedError = error;
+    /// If the data is a string, tries to decode it as JSON.
     if (data is String) {
       dynamic jsonBody;
 
       try {
         jsonBody = jsonDecode(data);
+
+        /// If the decoded JSON is null or not a map, returns a new ErrorModel object with the given description and status code.
         if (jsonBody == null || jsonBody is! Map<String, dynamic>) {
-          return ErrorModel(description: e.message, statusCode: e.response?.statusCode);
+          return _config.generateErrorModel(description: e.message, statusCode: e.response?.statusCode);
         }
 
-        return ErrorModel(
-          model: _config.errorModel.fromJson(jsonBody) as InterfaceClientModel,
+        /// Otherwise, returns a new ErrorModel object with the given JSON body, description, and status code.
+        return _config.generateErrorModel(
+          jsonBody: jsonBody,
           description: e.message,
           statusCode: e.response?.statusCode,
         );
@@ -113,19 +112,25 @@ class DioClient extends EAClient {
       }
     }
 
-    try {
-      if (data is Map<String, dynamic>) {
-        final jsonBody = data;
+    /// If the data is a map, tries to cast it to a Map<String, dynamic>.
+    if (data is Map<String, dynamic>) {
+      /// Creates a new ErrorModel object with the given JSON body, description, and status code.
+      final error = _config.generateErrorModel(
+        jsonBody: data,
+        description: e.message,
+        statusCode: e.response?.statusCode,
+      );
 
-        return ErrorModel(
-          model: _config.errorModel.fromJson(jsonBody) as InterfaceClientModel,
-          description: e.message,
-          statusCode: e.response?.statusCode,
-        );
-      }
-    } catch (e) {
-      log(e.toString());
+      /// Logs the error details.
+      log(error.statusCode.toString());
+      log(error.description.toString());
+      log(error.model.toString());
+
+      /// Returns the ErrorModel object.
+      return error;
     }
-    return ErrorModel(description: e.message, statusCode: e.response?.statusCode);
+
+    /// Otherwise, returns the original ErrorModel object.
+    return error;
   }
 }

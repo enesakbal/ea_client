@@ -59,7 +59,9 @@ void main() {
           method: RequestMethods.GET,
         );
       } on ErrorModel<TmdbErrorModel> catch (e) {
-        expect(e.model, 404);
+        expect(e.statusCode, 404);
+        expect(e.model?.statusMessage, 'The resource you requested could not be found.');
+        expect(e.model?.success, false);
       }
     });
 

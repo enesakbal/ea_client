@@ -18,12 +18,10 @@ class TmdbErrorModel extends InterfaceClientModel<TmdbErrorModel> {
   }
 
   @override
-  TmdbErrorModel fromJson(Map<String, dynamic> json) {
-    return _$TmdbErrorModelFromJson(json);
-  }
+  Map<String, dynamic> toJson() => _$TmdbErrorModelToJson(this);
 
   @override
-  Map<String, dynamic>? toJson() {
-    return _$TmdbErrorModelToJson(this);
+  TmdbErrorModel fromJson(Map<String, dynamic> json) {
+    return _$TmdbErrorModelFromJson(json);
   }
 }
