@@ -1,9 +1,11 @@
+import 'core/base/base_serializable_model.dart';
+import 'core/enums/client_adapters.dart';
 import 'core/models/error_model.dart';
-import 'interfaces/interface_client_model.dart';
 
-class ClientConfig<T extends InterfaceClientModel<T>> {
+class ClientConfig<E extends BaseSerializableModel<E>> {
   final String baseUrl;
-  final T errorModel;
+  final E errorModel;
+  final ClientAdapters adapter;
 
   final String? appName;
   final Map<String, dynamic>? headers;
@@ -12,16 +14,17 @@ class ClientConfig<T extends InterfaceClientModel<T>> {
   const ClientConfig({
     required this.baseUrl,
     required this.errorModel,
+    required this.adapter,
     this.appName,
     this.headers,
     this.logging = false,
   });
 
-  ErrorModel<T> generateErrorModel({
+  ErrorModel<E> generateErrorModel({
     String? description,
     int? statusCode,
     Map<String, dynamic>? jsonBody,
   }) {
-    return ErrorModel<T>(description: description, statusCode: statusCode, model: errorModel.fromJson(jsonBody ?? {}));
+    return ErrorModel<E>(description: description, statusCode: statusCode, model: errorModel.fromJson(jsonBody ?? {}));
   }
 }
