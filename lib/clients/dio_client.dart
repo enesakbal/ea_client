@@ -1,5 +1,3 @@
-// ignore_for_file: strict_raw_type
-
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -9,13 +7,12 @@ import 'package:dio/dio.dart' as dio;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../client_config.dart';
-import '../core/enums/request_methods.dart';
+import '../core/base/_export_base.dart';
+import '../core/enums/request_types.dart';
+import '../core/mixin/client_method_mixin.dart';
 import '../core/models/error_model.dart';
-import '../ea_client.dart';
-import '../interfaces/interface_client_model.dart';
-import '../interfaces/interface_response_model.dart';
 
-class DioClient extends EAClient {
+class DioClient extends BaseEAClient with ClientMethodMixin {
   final ClientConfig _config;
   final dio.HttpClientAdapter _adapter;
 
@@ -24,11 +21,10 @@ class DioClient extends EAClient {
         _adapter = adapter ?? HttpClientAdapter();
 
   @override
-  Future<InterfaceResponseModel<ResponseData?>>
-      send<ParserModel extends InterfaceClientModel<ParserModel>, ResponseData>(
+  Future<BaseDataModel<R?>> send<P extends BaseSerializableModel<P>, R>(
     String path, {
-    required RequestMethods method,
-    ParserModel? parseModel,
+    required RequestTypes method,
+    P? parseModel,
     dynamic data,
     Map<String, dynamic>? queryParameters,
   }) async {
@@ -52,7 +48,7 @@ class DioClient extends EAClient {
       //* prepare body
       late final dynamic body;
 
-      if (data is InterfaceClientModel) {
+      if (data is BaseSerializableModel) {
         body = data.toJson();
       } else if (data != null && data is! Map) {
         body = jsonEncode(data);
@@ -69,7 +65,7 @@ class DioClient extends EAClient {
 
       //* if success
       if (responseStatusCode >= HttpStatus.ok && responseStatusCode <= HttpStatus.multipleChoices) {
-        return getResponseResult<ParserModel, ResponseData>(response.data, parseModel, response.statusCode);
+        return getResponseResult<P, R>(response.data, parseModel, response.statusCode);
       }
       throw _config.generateErrorModel(description: response.statusMessage ?? response.statusCode.toString());
     } on dio.DioException catch (e) {
@@ -80,7 +76,7 @@ class DioClient extends EAClient {
     }
   }
 
-  ErrorModel _onError(dio.DioException e) {
+  ErrorModel<BaseSerializableModel<dynamic>> _onError(dio.DioException e) {
     final errorResponse = e.response;
 
     /// Creates a new ErrorModel object with the given description.
