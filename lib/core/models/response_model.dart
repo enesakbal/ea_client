@@ -1,5 +1,5 @@
-import '../../interfaces/interface_response_model.dart';
+import '../base/base_data_model.dart';
 
-class ResponseModel<R> extends InterfaceResponseModel<R?> {
+class ResponseModel<R> extends BaseDataModel<R?> {
   ResponseModel({R? data, int? statusCode}) : super(data, statusCode);
 }

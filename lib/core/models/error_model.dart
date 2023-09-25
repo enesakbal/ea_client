@@ -1,5 +1,5 @@
-import '../../interfaces/interface_error_model.dart';
+import '../base/base_error_model.dart';
 
-class ErrorModel<E> extends InterfaceErrorModel<E> {
-  ErrorModel({required super.description, super.model,super.statusCode});
+class ErrorModel<E> extends BaseErrorModel<E> {
+  ErrorModel({required super.description, super.model, super.statusCode});
 }
