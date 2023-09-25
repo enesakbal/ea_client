@@ -1,10 +1,10 @@
-import 'package:ea_client/interfaces/interface_client_model.dart';
+import 'package:ea_client/core/base/base_serializable_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'post_model.g.dart';
 
 @JsonSerializable()
-class PostModel extends InterfaceClientModel<PostModel> {
+class PostModel extends BaseSerializableModel<PostModel> {
   final int? userId;
   final int? id;
   final String? title;

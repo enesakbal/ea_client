@@ -1,4 +1,4 @@
-import 'package:ea_client/interfaces/interface_client_model.dart';
+import 'package:ea_client/core/base/base_serializable_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'movie_model.dart';
@@ -6,7 +6,7 @@ import 'movie_model.dart';
 part 'movie_list_model.g.dart';
 
 @JsonSerializable()
-class MovieListModel extends InterfaceClientModel<MovieListModel> {
+class MovieListModel extends BaseSerializableModel<MovieListModel> {
   int? page;
   List<MovieModel>? results;
   @JsonKey(name: 'total_pages')

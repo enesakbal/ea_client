@@ -1,10 +1,10 @@
-import 'package:ea_client/interfaces/interface_client_model.dart';
+import 'package:ea_client/core/base/base_serializable_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'tmdb_error_model.g.dart';
 
 @JsonSerializable()
-class TmdbErrorModel extends InterfaceClientModel<TmdbErrorModel> {
+class TmdbErrorModel extends BaseSerializableModel<TmdbErrorModel> {
   @JsonKey(name: 'status_code')
   int? statusCode;
   @JsonKey(name: 'status_message')
