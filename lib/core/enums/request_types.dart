@@ -1,4 +1,4 @@
-enum RequestMethods {
+enum RequestTypes {
   GET('GET'),
   PATCH('PATCH'),
   POST('POST'),
@@ -6,5 +6,5 @@ enum RequestMethods {
   DELETE('DELETE');
 
   final String stringValue;
-  const RequestMethods(this.stringValue);
+  const RequestTypes(this.stringValue);
 }

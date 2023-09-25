@@ -1,0 +1,4 @@
+enum ClientAdapters {
+  DIO,
+  HTTP;
+}
