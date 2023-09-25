@@ -1,7 +1,6 @@
 // ignore_for_file: unused_field
 
 import 'dart:developer';
-import 'dart:io';
 
 import 'client_config.dart';
 import 'core/enums/request_methods.dart';
@@ -65,18 +64,5 @@ abstract class EAClient {
       log(e.toString());
     }
     return null;
-  }
-
-  Map<String, dynamic>? setHeaders() {
-    final Map<String, dynamic>? headers;
-    if (_config.headers == null && _config.token != null) {
-      headers = {HttpHeaders.authorizationHeader: 'Bearer ${_config.token}'};
-    } else {
-      _config.headers
-          ?.addAll(_config.token != null ? {HttpHeaders.authorizationHeader: 'Bearer ${_config.token}'} : {});
-      headers = _config.headers;
-    }
-
-    return headers;
   }
 }

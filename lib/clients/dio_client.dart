@@ -38,7 +38,7 @@ class DioClient extends EAClient {
         BaseOptions(
           baseUrl: _config.baseUrl,
           method: method.stringValue,
-          headers: setHeaders(),
+          headers: _config.headers,
           queryParameters: queryParameters,
         ),
       )..httpClientAdapter = _adapter;
