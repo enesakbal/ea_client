@@ -80,9 +80,23 @@ class HttpClient extends BaseEAClient with ClientMethodMixin {
       //* return response
     } on ErrorModel {
       rethrow;
+    } on FormatException catch (e) {
+      throw _config.generateErrorModel(
+        error: NetworkException(
+          exceptionType: ServerExceptionType.formatException,
+          message: e.toString(),
+          statusCode: -1,
+        ),
+      );
+    } on SocketException catch (e) {
+      throw _config.generateErrorModel(
+        error: NetworkException(
+          exceptionType: ServerExceptionType.socketException,
+          message: e.toString(),
+          statusCode: -1,
+        ),
+      );
     } on Exception catch (e) {
-      log(e.toString());
-
       throw _config.generateErrorModel(
         error: NetworkException(
           exceptionType: ServerExceptionType.unexpectedError,

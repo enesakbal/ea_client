@@ -56,5 +56,18 @@ void main() {
         expect(e.error?.exceptionType, ServerExceptionType.notFound);
       }
     });
+
+    // Test [ServerExceptionType.connectionError]
+    // test('status code should return [Socket Exception]', () async {
+    //   try {
+    //     final response = await dioClient.send<PostModel, List<PostModel>>(
+    //       '/posts',
+    //       parserModel: PostModel(),
+    //       method: RequestTypes.GET,
+    //     );
+    //   } on ErrorModel catch (e) {
+    //     expect(e.error?.exceptionType, ServerExceptionType.connectionError);
+    //   }
+    // });
   });
 }
