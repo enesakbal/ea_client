@@ -8,9 +8,9 @@ import 'core/enums/client_adapters.dart';
 /// configuration.
 
 class EANetworkManager {
-  static late final ClientConfig _config;
+  late final ClientConfig _config;
 
-  static late final BaseEAClient _client;
+  late final BaseEAClient _client;
 
   /// The function creates a network manager object based on the provided client configuration.
   ///

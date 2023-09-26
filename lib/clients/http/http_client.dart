@@ -76,6 +76,8 @@ class HttpClient extends BaseEAClient with ClientMethodMixin {
       }
 
       //* return response
+    } on ErrorModel {
+      rethrow;
     } on Exception catch (e) {
       log(e.toString());
 
