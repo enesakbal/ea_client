@@ -15,7 +15,7 @@ abstract class BaseEAClient {
   /// the parameters:
   Future<BaseDataModel<R?>> send<P extends BaseSerializableModel<P>, R>(
     String path, {
-    required P parseModel,
+    required P parserModel,
     required RequestTypes method,
     dynamic data,
     Map<String, dynamic>? queryParameters,

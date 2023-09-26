@@ -4,11 +4,11 @@ import '../base/_export_base.dart';
 import '../models/_export_models.dart';
 
 mixin ClientMethodMixin {
-  ResponseModel<R> getResponseResult<P extends BaseSerializableModel<P>, R>(
-    dynamic data,
-    P? parserModel,
-    int? statusCode,
-  ) {
+  ResponseModel<R> getResponseResult<P extends BaseSerializableModel<P>, R>({
+    required dynamic data,
+    required P? parserModel,
+    required int statusCode,
+  }) {
     final model = parseBody<R, P>(data, parserModel);
 
     return ResponseModel<R>(
