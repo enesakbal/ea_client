@@ -1,34 +1,38 @@
 import 'package:ea_client/client_config.dart';
-import 'package:ea_client/clients/dio_client.dart';
-import 'package:ea_client/core/enums/request_methods.dart';
+import 'package:ea_client/core/base/base_ea_client.dart';
+import 'package:ea_client/core/enums/client_adapters.dart';
+import 'package:ea_client/core/enums/request_types.dart';
+import 'package:ea_client/core/enums/server_client_exceptions.dart';
 import 'package:ea_client/core/models/error_model.dart';
+import 'package:ea_client/ea_network_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '_utils/models/post_model/post_model.dart';
-import '_utils/models/tmdb_error_model/tmdb_error_model.dart';
+import '../_utils/models/post_model/post_model.dart';
 
 void main() {
-  late final DioClient dioClient;
+  late final BaseEAClient dioClient;
 
   setUpAll(() {
     final config = ClientConfig(
-      baseUrl: 'https://jsonplaceholder.typicode.com/',
+      adapter: ClientAdapters.DIO,
+      baseUrl: 'https://jsonplaceholder.typicode.com',
       appName: 'example',
       headers: {
         'Accept': 'application/json',
         'Content-type': 'application/json; charset=UTF-8',
       },
-      errorModel: TmdbErrorModel(),
     );
 
-    dioClient = DioClient(config: config);
+    final network = EANetworkManager(config: config);
+
+    dioClient = network.client;
   });
   group('[REMOTE] Dio [GET METHOD] on [Json Place Holder]', () {
     test('status code should return [200]', () async {
       final response = await dioClient.send<PostModel, List<PostModel>>(
         '/posts',
-        parseModel: PostModel(),
-        method: RequestMethods.GET,
+        parserModel: PostModel(),
+        method: RequestTypes.GET,
       );
 
       expect(response.statusCode, 200);
@@ -37,8 +41,8 @@ void main() {
     test('response data should return [List<PostModel>]', () async {
       final response = await dioClient.send<PostModel, List<PostModel>>(
         '/posts',
-        parseModel: PostModel(),
-        method: RequestMethods.GET,
+        parserModel: PostModel(),
+        method: RequestTypes.GET,
       );
 
       expect(response.data, isA<List<PostModel>>());
@@ -48,12 +52,14 @@ void main() {
       try {
         await dioClient.send(
           '/postswe',
-          parseModel: PostModel(),
-          method: RequestMethods.GET,
+          parserModel: PostModel(),
+          method: RequestTypes.GET,
         );
+
         // expect(response, isA<ErrorModel>());
       } on ErrorModel catch (e) {
-        expect(e.statusCode, 404);
+        expect(e.error?.statusCode, 404);
+        expect(e.error?.exceptionType, ServerExceptionType.notFound);
       }
     });
   });
