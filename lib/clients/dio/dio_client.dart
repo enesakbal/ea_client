@@ -7,8 +7,8 @@ import 'package:dio/dio.dart' as dio;
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-import '../../client_config.dart';
 import '../../core/base/_export_base.dart';
+import '../../core/client_config.dart';
 import '../../core/enums/request_types.dart';
 import '../../core/error/network_exception.dart';
 import '../../core/mixin/client_method_mixin.dart';

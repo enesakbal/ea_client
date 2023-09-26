@@ -1,6 +1,5 @@
 // ignore_for_file: unused_field
-
-import '../../client_config.dart';
+import '../client_config.dart';
 import '../enums/request_types.dart';
 import '_export_base.dart';
 

@@ -5,14 +5,16 @@ import 'dart:io';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 
-import '../../client_config.dart';
 import '../../core/base/_export_base.dart';
+import '../../core/client_config.dart';
 import '../../core/enums/request_types.dart';
 import '../../core/enums/server_client_exceptions.dart';
 import '../../core/error/network_exception.dart';
 import '../../core/mixin/client_method_mixin.dart';
 import '../../core/models/error_model.dart';
 
+/// The HttpClient class is a Dart class that extends the BaseEAClient class and includes the
+/// ClientMethodMixin.
 class HttpClient extends BaseEAClient with ClientMethodMixin {
   final ClientConfig _config;
   final BaseClient? baseClient;

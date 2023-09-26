@@ -1,7 +1,7 @@
-import 'core/base/base_serializable_model.dart';
-import 'core/enums/client_adapters.dart';
-import 'core/error/network_exception.dart';
-import 'core/models/_export_models.dart';
+import 'base/base_serializable_model.dart';
+import 'enums/client_adapters.dart';
+import 'error/network_exception.dart';
+import 'models/_export_models.dart';
 
 typedef Empty<T extends BaseSerializableModel<dynamic>> = EmptyErrorModel<T?>;
 

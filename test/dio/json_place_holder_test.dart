@@ -1,10 +1,4 @@
-import 'package:ea_client/client_config.dart';
-import 'package:ea_client/core/base/base_ea_client.dart';
-import 'package:ea_client/core/enums/client_adapters.dart';
-import 'package:ea_client/core/enums/request_types.dart';
-import 'package:ea_client/core/enums/server_client_exceptions.dart';
-import 'package:ea_client/core/models/error_model.dart';
-import 'package:ea_client/ea_network_manager.dart';
+import 'package:ea_client/ea_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../_utils/models/post_model/post_model.dart';

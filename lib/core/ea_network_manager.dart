@@ -1,10 +1,12 @@
+import '../clients/dio/dio_client.dart';
+import '../clients/http/http_client.dart';
+import 'base/base_ea_client.dart';
 import 'client_config.dart';
-import 'clients/dio/dio_client.dart';
-import 'clients/http/http_client.dart';
-import 'core/base/base_ea_client.dart';
-import 'core/enums/client_adapters.dart';
+import 'enums/client_adapters.dart';
 
 /// The `EANetworkManager` class is a Dart class that manages the network client based on the provided
+/// The line `library ea_network;` is declaring the Dart library name as "ea_network". This allows other
+/// Dart files to import and use the classes and functions defined in this library.
 /// configuration.
 
 class EANetworkManager {
