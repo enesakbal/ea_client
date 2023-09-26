@@ -17,7 +17,7 @@ abstract class BaseEAClient {
     String path, {
     required P parserModel,
     required RequestTypes method,
-    dynamic data,
+    Object? data,
     Map<String, dynamic>? queryParameters,
   });
 }

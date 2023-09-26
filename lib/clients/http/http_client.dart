@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../../client_config.dart';
 import '../../core/base/_export_base.dart';
 import '../../core/enums/request_types.dart';
+import '../../core/enums/server_client_exceptions.dart';
 import '../../core/error/network_exception.dart';
 import '../../core/mixin/client_method_mixin.dart';
 import '../../core/models/error_model.dart';
@@ -23,7 +24,7 @@ class HttpClient extends BaseEAClient with ClientMethodMixin {
     String path, {
     required P parserModel,
     required RequestTypes method,
-    data,
+    Object? data,
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
@@ -66,14 +67,25 @@ class HttpClient extends BaseEAClient with ClientMethodMixin {
       if (response.statusCode > HttpStatus.multipleChoices) {
         final exception = await _onError(response);
         throw exception;
+      } else {
+        final responseBytes = await response.stream.toBytes();
+        final data = jsonDecode(String.fromCharCodes(responseBytes));
+
+        client.close();
+        return getResponseResult<P, R>(data: data, parserModel: parserModel, statusCode: response.statusCode);
       }
 
-      client.close();
-
       //* return response
-      return getResponseResult<P, R>(data: response, parserModel: parserModel, statusCode: response.statusCode);
-    } on Exception {
-      rethrow;
+    } on Exception catch (e) {
+      log(e.toString());
+
+      throw _config.generateErrorModel(
+        error: NetworkException(
+          exceptionType: ServerExceptionType.unexpectedError,
+          message: e.toString(),
+          statusCode: -1,
+        ),
+      );
     }
   }
 

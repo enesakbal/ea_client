@@ -1,3 +1,7 @@
+/// The code snippet is defining an enumeration called `ServerExceptionType` in the Dart programming
+/// language. An enumeration is a special data type that represents a set of named values. In this case,
+/// the `ServerExceptionType` enumeration represents different types of server exceptions that can occur
+/// in an application.
 enum ServerExceptionType {
   requestCancelled,
   badCertificate,

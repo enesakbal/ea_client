@@ -40,41 +40,41 @@ class NetworkException extends Equatable {
           serverException = NetworkException._(
             exceptionType: ServerExceptionType.requestCancelled,
             statusCode: statusCode,
-            message: 'Request to the server has been canceled',
+            message: 'Request to the server has been canceled.',
           );
 
         case DioExceptionType.connectionTimeout:
           serverException = NetworkException._(
             exceptionType: ServerExceptionType.requestTimeout,
             statusCode: statusCode,
-            message: 'Connection timeout',
+            message: 'Connection timeout.',
           );
 
         case DioExceptionType.receiveTimeout:
           serverException = NetworkException._(
             exceptionType: ServerExceptionType.recieveTimeout,
             statusCode: statusCode,
-            message: 'Receive timeout',
+            message: 'Receive timeout.',
           );
 
         case DioExceptionType.sendTimeout:
           serverException = NetworkException._(
             exceptionType: ServerExceptionType.sendTimeout,
             statusCode: statusCode,
-            message: 'Send timeout',
+            message: 'Send timeout.',
           );
 
         case DioExceptionType.connectionError:
           serverException = NetworkException._(
             exceptionType: ServerExceptionType.connectionError,
-            message: 'Connection error',
+            message: 'Connection error.',
             statusCode: statusCode,
           );
 
         case DioExceptionType.badCertificate:
           serverException = NetworkException._(
             exceptionType: ServerExceptionType.badCertificate,
-            message: 'Bad certificate',
+            message: 'Bad certificate.',
             statusCode: statusCode,
           );
 
@@ -82,12 +82,12 @@ class NetworkException extends Equatable {
           if (error.toString().contains(ServerExceptionType.socketException.name)) {
             serverException = NetworkException._(
               statusCode: statusCode,
-              message: 'Verify your internet connection',
+              message: 'Verify your internet connection.',
             );
           } else {
             serverException = NetworkException._(
               statusCode: statusCode,
-              message: 'Unexpected error',
+              message: 'Unexpected error.',
             );
           }
 
@@ -102,60 +102,60 @@ class NetworkException extends Equatable {
             case 401:
               serverException = const NetworkException._(
                 exceptionType: ServerExceptionType.unauthorisedRequest,
-                message: 'Authentication failure',
+                message: 'Authentication failure.',
                 statusCode: 401,
               );
             case 403:
               serverException = const NetworkException._(
                 exceptionType: ServerExceptionType.unauthorisedRequest,
-                message: 'User is not authorized to access API',
+                message: 'User is not authorized to access API.',
                 statusCode: 403,
               );
             case 404:
               serverException = const NetworkException._(
                 exceptionType: ServerExceptionType.notFound,
-                message: 'Request ressource does not exist',
+                message: 'Not Found.',
                 statusCode: 404,
               );
             case 405:
               serverException = const NetworkException._(
                 exceptionType: ServerExceptionType.unauthorisedRequest,
-                message: 'Operation not allowed',
+                message: 'Operation not allowed.',
                 statusCode: 405,
               );
             case 415:
               serverException = const NetworkException._(
                 exceptionType: ServerExceptionType.notImplemented,
-                message: 'Media type unsupported',
+                message: 'Media type unsupported.',
                 statusCode: 415,
               );
             case 422:
               serverException = const NetworkException._(
                 exceptionType: ServerExceptionType.unableToProcess,
-                message: 'validation data failure',
+                message: 'validation data failure.',
                 statusCode: 422,
               );
             case 429:
               serverException = const NetworkException._(
                 exceptionType: ServerExceptionType.conflict,
-                message: 'too much requests',
+                message: 'too much requests.',
                 statusCode: 429,
               );
             case 500:
               serverException = const NetworkException._(
                 exceptionType: ServerExceptionType.internalServerError,
-                message: 'Internal server error',
+                message: 'Internal server error.',
                 statusCode: 500,
               );
             case 503:
               serverException = const NetworkException._(
                 exceptionType: ServerExceptionType.serviceUnavailable,
-                message: 'Service unavailable',
+                message: 'Service unavailable.',
                 statusCode: 503,
               );
             default:
               serverException = const NetworkException._(
-                message: 'Unexpected error',
+                message: 'Unexpected error.',
                 statusCode: -1,
               );
           }
@@ -174,7 +174,7 @@ class NetworkException extends Equatable {
       );
     } on Exception catch (_) {
       serverException = const NetworkException._(
-        message: 'Unexpected error',
+        message: 'Unexpected error.',
         statusCode: -1,
       );
     }
@@ -187,83 +187,84 @@ class NetworkException extends Equatable {
 
     late NetworkException serverException;
 
-    if (statusCode >= 400 && statusCode < 500) {
-      if (statusCode == 400) {
+    switch (statusCode) {
+      case 400:
         serverException = NetworkException(
           exceptionType: ServerExceptionType.badRequest,
-          message: 'Bad request',
+          message: 'Bad request.',
           statusCode: statusCode,
         );
-      } else if (statusCode == 401) {
+        break;
+      case 401:
         serverException = NetworkException(
           exceptionType: ServerExceptionType.unauthorisedRequest,
-          message: 'Unauthorized',
+          message: 'Unauthorized.',
           statusCode: statusCode,
         );
-      } else if (statusCode == 403) {
+        break;
+      case 403:
         serverException = NetworkException(
           exceptionType: ServerExceptionType.forbidden,
-          message: 'Forbidden',
+          message: 'Forbidden.',
           statusCode: statusCode,
         );
-      } else if (statusCode == 404) {
+        break;
+      case 404:
         serverException = NetworkException(
           exceptionType: ServerExceptionType.notFound,
-          message: 'Not Found',
+          message: 'Not Found.',
           statusCode: statusCode,
         );
-      } else if (statusCode == 422) {
+        break;
+      case 422:
         serverException = NetworkException(
           exceptionType: ServerExceptionType.unprocessableEntity,
-          message: 'Unprocessable Entity',
+          message: 'Unprocessable Entity.',
           statusCode: statusCode,
         );
-      } else if (statusCode == 429) {
+        break;
+      case 429:
         serverException = NetworkException(
           exceptionType: ServerExceptionType.tooManyRequests,
-          message: 'Too Many Requests',
+          message: 'Too Many Requests.',
           statusCode: statusCode,
         );
-      } else {
+        break;
+      case 500:
         serverException = NetworkException(
-          exceptionType: ServerExceptionType.clientError,
-          message: 'Client Error',
+          exceptionType: ServerExceptionType.internalServerError,
+          message: 'Internal Server Error.',
           statusCode: statusCode,
         );
-      }
-      if (statusCode >= 500) {
-        if (statusCode == 500) {
+        break;
+      case 503:
+        serverException = NetworkException(
+          exceptionType: ServerExceptionType.serviceUnavailable,
+          message: 'Service Unavailable.',
+          statusCode: statusCode,
+        );
+        break;
+      default:
+        if (statusCode >= 400 && statusCode < 500) {
           serverException = NetworkException(
-            exceptionType: ServerExceptionType.internalServerError,
-            message: 'Internal Server Error',
+            exceptionType: ServerExceptionType.clientError,
+            message: 'Client Error.',
             statusCode: statusCode,
           );
-        } else if (statusCode == 503) {
+        } else if (statusCode >= 500) {
           serverException = NetworkException(
-            exceptionType: ServerExceptionType.serviceUnavailable,
-            message: 'Service Unavailable',
+            exceptionType: ServerExceptionType.internalServerError,
+            message: 'Server Error.',
             statusCode: statusCode,
           );
         } else {
           serverException = NetworkException(
-            exceptionType: ServerExceptionType.internalServerError,
-            message: 'Server Error',
+            exceptionType: ServerExceptionType.unexpectedError,
+            message: 'An unexpected error occurred.',
             statusCode: statusCode,
           );
         }
-      } else {
-        serverException = NetworkException(
-          exceptionType: ServerExceptionType.unknown,
-          message: 'An unexpected error occurred',
-          statusCode: statusCode,
-        );
-      }
-    } else {
-      serverException = NetworkException(
-        exceptionType: ServerExceptionType.unexpectedError,
-        message: 'An unexpected error occurred',
-        statusCode: statusCode,
-      );
+        break;
     }
 
     return serverException;
