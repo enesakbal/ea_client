@@ -1,5 +1,6 @@
 import 'core/base/base_serializable_model.dart';
 import 'core/enums/client_adapters.dart';
+import 'core/error/network_exception.dart';
 import 'core/models/error_model.dart';
 
 class ClientConfig<E extends BaseSerializableModel<E>> {
@@ -21,10 +22,9 @@ class ClientConfig<E extends BaseSerializableModel<E>> {
   });
 
   ErrorModel<E> generateErrorModel({
-    String? description,
-    int? statusCode,
+    NetworkException? error,
     Map<String, dynamic>? jsonBody,
   }) {
-    return ErrorModel<E>(description: description, statusCode: statusCode, model: errorModel.fromJson(jsonBody ?? {}));
+    return ErrorModel<E>(error: error, model: errorModel.fromJson(jsonBody ?? {}));
   }
 }

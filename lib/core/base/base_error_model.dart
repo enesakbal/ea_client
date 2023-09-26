@@ -1,7 +1,8 @@
+import '../error/network_exception.dart';
+
 abstract class BaseErrorModel<E> implements Exception {
-  final String? description;
-  final int? statusCode;
+  final NetworkException? error;
   final E? model;
 
-  const BaseErrorModel({required this.description, this.model, this.statusCode});
+  const BaseErrorModel({required this.error, this.model});
 }
